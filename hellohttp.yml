@@ -1,0 +1,29 @@
+trigger:
+  branches:
+    include:
+    - shkr/crank-scenario-file
+
+# CI only, does not trigger on PRs.
+pr: none
+
+variables:
+  arguments: '--verbose'
+
+jobs:
+- job: PublishToServiceBus
+  pool: server
+  steps:
+    - task: PublishToAzureServiceBus@2
+      displayName: "Publish To Azure ServiceBus"
+      inputs:
+        azureSubscription: Azure-Functions-Host-Perf-internal
+        serviceBusQueueName: dni9-hello-http
+        serviceBusNamespace: azure-functions-host-perf
+        waitForCompletion: true
+        useDataContractSerializer: "false"
+        messageBody: |
+          {
+            "name": "crank",
+            "retries": 1,
+            "args": [ "-scenario hellohttp  ${{ variables.arguments }} --variable foo=30" ]
+          }
