@@ -1,29 +1,39 @@
-trigger:
-  branches:
-    include:
-    - shkr/crank-scenario-file
-
-# CI only, does not trigger on PRs.
-pr: none
-
-variables:
-  arguments: '--verbose'
+imports:
+  - https://raw.githubusercontent.com/dotnet/crank/main/src/Microsoft.Crank.Jobs.Bombardier/bombardier.yml
 
 jobs:
-- job: PublishToServiceBus
-  pool: server
-  steps:
-    - task: PublishToAzureServiceBus@2
-      displayName: "Publish To Azure ServiceBus"
-      inputs:
-        azureSubscription: Azure-Functions-Host-Perf-internal
-        serviceBusQueueName: dni9-hello-http
-        serviceBusNamespace: azure-functions-host-perf
-        waitForCompletion: true
-        useDataContractSerializer: "false"
-        messageBody: |
-          {
-            "name": "crank",
-            "retries": 1,
-            "args": [ "-scenario hellohttp  ${{ variables.arguments }} --variable foo=30" ]
-          }
+
+  server:
+    sources:
+      functionshost:
+        repository: https://github.com/Azure/azure-functions-host
+        branchOrCommit: dev
+    project: functionshost/src/WebJobs.Script.WebHost/WebJobs.Script.WebHost.csproj
+    readyStateText: 'Application started.'
+    environmentVariables:
+      AZURE_FUNCTIONS_ENVIRONMENT: Development
+      FUNCTIONS_WORKER_RUNTIME: dotnet-isolated
+      ASPNETCORE_ENVIRONMENT: Development
+
+scenarios:
+  hellohttp:
+    hostruntime:
+      job: server
+        
+    load:
+      job: bombardier
+      variables:
+        serverPort: 5000
+        path: /
+
+profiles:
+  win2022:
+    variables:
+      serverAddress: localhost
+    jobs: 
+      hostruntime:
+        endpoints: 
+          - http://localhost:5010
+      load:
+        endpoints: 
+          - http://localhost:5010
