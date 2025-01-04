@@ -11,9 +11,9 @@ jobs:
     project: functionshost/src/WebJobs.Script.WebHost/WebJobs.Script.WebHost.csproj
     readyStateText: 'Application started.'
     environmentVariables:
+      AzureWebJobsScriptRoot: "C:\\FunctionApps\\HelloHttp9"
       AZURE_FUNCTIONS_ENVIRONMENT: Development
       FUNCTIONS_WORKER_RUNTIME: dotnet-isolated
-      ASPNETCORE_ENVIRONMENT: Development
 
 scenarios:
   hellohttp:
@@ -24,7 +24,7 @@ scenarios:
       job: bombardier
       variables:
         serverPort: 5000
-        path: /
+        path: /api/Hello
 
 profiles:
   win2022:
