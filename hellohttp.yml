@@ -13,6 +13,7 @@ jobs:
     environmentVariables:
       AzureWebJobsScriptRoot: "C:\\FunctionApps\\HelloHttp9"
       FUNCTIONS_WORKER_RUNTIME: dotnet-isolated
+      AZURE_FUNCTIONS_ENVIRONMENT: Development
 
 scenarios:
   hellohttp:
